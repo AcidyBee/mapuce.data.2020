@@ -1,0 +1,28 @@
+#' Semantic data for mapuce project (IdF), obtained from INSEE RP INDCVI detail file 2020 for reg_code == "11"
+#'
+#' Transformation on INSEE RP INDCVI detail file millesime 2020 restricted to reg_code == "11",
+#' limited to columns related to mapuce project,
+#' and rows corresponding to `LPRM == "1"` & `METRODOM == "M"` & `TYPL %in% c("1", "2")` (logement ordinaire: maison ou appartement)
+#' @format Data frame with 17 columns and 1,877,194 rows
+#' \describe{
+#' \item{atome_indcvi}{atome_indcvi du lieu de résidence s'il est défini, cv_code sinon, 9 ou 5 character}
+#' \item{iris_code}{Code IRIS du lieu de résidence, 9 character}
+#' \item{iris_typ}{Type de l'IRIS du lieu de résidence, 1 character}
+#' \item{cv_code}{Département, canton-ou-ville du lieu de résidence (pseudo-canton), 5 character}
+#' \item{arm_code}{Arrondissement municipal de résidence (Paris, Lyon et Marseille), 5 character}
+#' \item{ipondi}{Poids de l'individu, 17 numeric}
+#' \item{agerev}{Âge en années révolues détaillé de la perssone de référence du ménage, 3 character converti en integer à l'importation pour utilisation dans les modeles}
+#' \item{inper}{Nombre de personnes du ménage, converti en integer à l'importation pour utilisation dans les modeles}
+#' \item{couple}{Vie en couple (1=oui/2=non), factor}
+#' \item{typl_ma}{Type de logement maison ou appartement, factor}
+#' \item{chfl_3g}{Chauffage central du logement (France métropolitaine), factor}
+#' \item{cmbl_cre}{Combustible principal du logement (France métropolitaine), factor}
+#' \item{surf_6g_cont}{Superficie du logement en 6 groupes continu, integer}
+#' \item{surf_nbpi_4g}{Superficie du logement en 4 groupes, factor}
+#' \item{nperr_123}{Nombre de personnes du ménage (regroupé: 1, 2, 3 ou +), factor}
+#' \item{stocd_2g}{Statut d'occupation du logement en 2 groupes: propriétaires vs autres, factor}
+#' \item{atome_indcvi_typ}{Type de l'atome_indcvi du lieu de résidence s'il est défini, cv_code sinon, 9 ou 5 character}
+#' }
+#' @examples
+#'   mapuce_indcvi_IdF
+"mapuce_indcvi_IdF"

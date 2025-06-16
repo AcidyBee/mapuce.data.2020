@@ -1,0 +1,9 @@
+^mapuce\.data\.2020\.Rproj$
+^\.Rproj\.user$
+^dev/devtools_history\.R$
+^LICENSE\.md$
+# ^data/.*\.rda$
+^data-raw$
+^dev$             # /dev/: Holds internal tools, demo apps, and experimental modules.
+^dev/.*
+^README\.Rmd$

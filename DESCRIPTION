@@ -1,0 +1,23 @@
+Package: mapuce.data.2020
+Title: Data Package for Mapuce Calculations
+Version: 0.0.1.0
+Authors@R: 
+    person("Alexis", "Bourgeois", , "acidybee@proton.me", role = c("aut", "cre"),
+           comment = c(ORCID = "0009-0009-8513-1715"))
+Description: This package provides models and data needed for Mapuce calculations.
+License: MIT + file LICENSE
+Imports: 
+    magrittr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends: 
+    R (>= 3.5)
+LazyData: true
+LazyDataCompression: xz
+Suggests: 
+    dplyr,
+    ggplot2,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

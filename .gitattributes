@@ -1,0 +1,2 @@
+/data/mapuce_indcvi.rda filter=lfs diff=lfs merge=lfs -text
+/data/spatial_iris.rda filter=lfs diff=lfs merge=lfs -text

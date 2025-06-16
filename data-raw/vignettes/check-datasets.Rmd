@@ -1,0 +1,68 @@
+---
+title: "check-datasets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{check-datasets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(mapuce.data.2020)
+requireNamespace("dplyr", quietly = TRUE)
+requireNamespace("ggplot2", quietly = TRUE)
+library(ggplot2)
+```
+
+Les entités sont relativement larges dans les zones peu denses...
+
+```{r}
+lut_IdF <- lut_iris_atome_indcvi %>%
+  dplyr::semi_join(insee.admin.data.2022::insee_admin_decoupage %>% dplyr::filter(.data$reg_code == "11"), by = "iris_code")
+
+lut_Idf <- lut_iris_atome_indcvi_IdF
+
+spatial_atome_indcvi %>% 
+  dplyr::semi_join(lut_IdF, by = "atome_indcvi") %>% 
+  ggplot2::ggplot(ggplot2::aes(fill = .data$atome_indcvi_type)) +
+  ggplot2::geom_sf() +
+  ggplot2::geom_sf(data = spatial_iris %>% dplyr::semi_join(lut_IdF, by = "iris_code"), 
+                   linetype = "dotted", linewidth = .15, fill = NA, color = "white") + # , alpha = .5
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Frontières atome_indcvi et iris pour l'IdF")
+```
+
+Mais sont très proches des iris pour les zones denses
+
+```{r}
+spatial_atome_indcvi %>% 
+  dplyr::filter(stringr::str_detect(.data$atome_indcvi, "^75")) %>% 
+  ggplot2::ggplot(ggplot2::aes(fill = .data$atome_indcvi_type)) +
+  ggplot2::geom_sf() +
+  ggplot2::geom_sf(data = spatial_iris %>% dplyr::filter(stringr::str_detect(.data$iris_code, "^75")), 
+                   linetype = "dotted", linewidth = .15, fill = NA, color = "white") + # , alpha = .5
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Frontières atome_indcvi et iris pour l'IdF")
+```
+
+A priori les 2 datasets contiennent exactement le même nombre d'éléments, et des éléments identiques:
+
+```{r}
+mapuce_indcvi_distinct <- mapuce_indcvi %>% 
+  dplyr::distinct(atome_indcvi, atome_indcvi_type) %>% 
+  dplyr::arrange(atome_indcvi)
+spatial_atome_indcvi_distinct <- spatial_atome_indcvi %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::distinct(atome_indcvi, atome_indcvi_type) %>% 
+  dplyr::arrange(atome_indcvi)
+setdiff(mapuce_indcvi_distinct, spatial_atome_indcvi_distinct)
+setdiff(spatial_atome_indcvi_distinct, mapuce_indcvi_distinct)
+```
+
