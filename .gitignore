@@ -6,3 +6,5 @@
 docs/
 Meta/
 dev/
+data-raw/pipeline_graph.html
+data-raw/lib

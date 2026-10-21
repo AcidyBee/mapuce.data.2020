@@ -11,38 +11,19 @@ knitr::opts_chunk$set(
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+
+library(ggplot2)
+library(dplyr)
+library(stringr)
 ```
-
-# TODO
-
-DONE: 2025-06-16: Les spatial_atome_indcvi ont des polygones redondants, il faut les supprimer (cf. insee.rp ou insee.admin)
 
 # mapuce.data.2020
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/AcidyBee/mapuce.data.2020/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/AcidyBee/mapuce.data.2020/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-<!-- ## Data Compression   -->
-<!-- This package uses `LazyDataCompression: mixed` (some datasets compressed with `xz`, others with `bzip2`). -->
-
-## Data Compression and Size  
-This package contains large datasets compressed with `xz` (optimal compression).  
-- Total installed size: ~160.1Mb  
-- Primary use: [Briefly explain why the data is large, e.g., "high-resolution spatial data for France"]  
-- To reduce local disk usage, load only needed datasets with `data("dataset_name", package = "mapuce.data.2020")`. 
-
-## Data File Naming Convention
-
-Files follow `{dataset}_{zone}_{rp_year}.rda` format:
-- `spatial_iris_ZONE_A_2020.rda`: 2020 RP data with 2022 admin borders
-<!-- - `mapuce_indcvi_FRA_2018.rda`: 2018 RP data with 2020 admin borders -->
-
-| File Pattern | Contents |
-|--------------|----------|
-| `*_2020.rda` | RP 2020 + Admin 2022 |
-| `*_2018.rda` | RP 2018 + Admin 2020 |
-
-The goal of mapuce.data.2020 is to ...
+The goal of `mapuce.data.2020` is to provide ready-to-use datasets for MAPUCE models, derived from the 2020 French census (RP INDCVI) and the 2022 administrative boundaries.
 
 ## Installation
 
@@ -52,20 +33,58 @@ You can install the development version of mapuce.data.2020 like so:
 remotes::install_github("AcidyBee/mapuce.data.2020")
 ```
 
+## Source
+
+Raw data come from the INSEE RP INDCVI 2020 detail files and the 2022 administrative boundaries. See `data-raw/DATASET.R` and `data-raw/_targets.R` for the generation pipeline.
+
+## Datasets
+
+| Dataset | Description |
+| :--- | :--- |
+| `mapuce_indcvi` | Semantic data for France (RP 2020) |
+| `mapuce_indcvi_za` | Semantic data restricted to Île-de-France |
+| `lut_iris_atome_indcvi` | Lookup table between IRIS and `atome_indcvi` |
+| `spatial_iris` | Spatial data at IRIS level (2022 boundaries, WGS84) | 
+| `spatial_atome_indcvi` | Spatial data at `atome_indcvi` level (2022 boundaries, WGS84) |
+| `*_za` variants | Same datasets restricted to Île-de-France |
+
+## Data File Naming Convention
+
+Files follow `{dataset}_{zone}.rda` format:
+- `spatial_iris_za.rda`: zone A corresponds to Île-de-France
+- `mapuce_indcvi.rda`: no zone defined means the whole country
+
+## Data Compression and Size  
+
+This package contains large datasets compressed with `xz`, except for `mapuce_indcvi` which is compressed with `bzip2` (optimal compression).  
+- Total installed size: ~160 MB  
+- Primary use: high-resolution spatial data for France, at IRIS and `atome_indcvi` granularity  
+- To reduce local disk usage, load only needed datasets with `data("dataset_name", package = "mapuce.data.2020")`.
+
+| Dataset | Size |
+| :--- | :--- |
+| `mapuce_indcvi` | ~50 MB |
+| `mapuce_indcvi_za` | ~10 MB |
+| `lut_iris_atome_indcvi` | ~70 KB |
+| `lut_iris_atome_indcvi_za` | ~10 KB |
+| `spatial_iris` | ~60 MB | 
+| `spatial_atome_indcvi` | ~20 MB |
+| `spatial_iris_za` | ~3 MB | 
+| `spatial_atome_indcvi_za` | ~2 MB |
+
+## Data generation pipeline
+
+The graph below shows the `targets` pipeline used to generate the package datasets. Each node is a target; arrows indicate dependencies between steps. Only the targets required to produce the final datasets are displayed.
+
+![Targets pipeline](man/figures/README-pipeline.png)
+
 ## Example
 
-Data for this project are agregated at what Insee calls cantville granularity: it corresponds to:
+Data for this project are aggregated at what Insee calls cantville granularity: it corresponds to:
 - IRIS for dense areas
 - COMMUNE or CANTON for lesser population areas
 
-The atome_indcvi key has been created to link semantic and spatial information for Insee RP indcvi detail files. The atome_indcvi variable is the smallest possible entity for indcvi files, and is obtained using hierachically (IRIS < COMMUNE < CANTON) the information available for each observation in the file.
-
-This is a basic example which shows you how to load data:
-
-```{r example}
-library(mapuce.data.2020)
-## basic example code
-```
+The atome_indcvi key has been created to link semantic and spatial information for Insee RP indcvi detail files. The atome_indcvi variable is the smallest possible entity for indcvi files, and is obtained using hierarchically (IRIS < COMMUNE < CANTON) the information available for each observation in the file.
 
 ### Semantic data
 
@@ -74,33 +93,43 @@ Head of semantic data for zone A: Ile de France. The rows correspond to the city
 You can see that for the 6 first rows of the dataset, the 9 digits iris_code is available. On the other hand, for Paris the cv_code (cantville) is not complete: it corresponds to the DEPARTEMENT granularity. It is replaced with arm_code which only exists for the 3 major french cities: Lyon, Marseille and Paris).
 
 ```{r}
+data("mapuce_indcvi_za", package = "mapuce.data.2020")
 head(mapuce_indcvi_za)
 ```
 
 ### Spatial data
 
-Corresponding choroplethe map data for zone A (Ile de France)
+Corresponding choropleth map data for zone A (Ile de France)
 
 ```{r}
+data("spatial_iris", package = "mapuce.data.2020")
+data("spatial_atome_indcvi_za", package = "mapuce.data.2020")
 spatial_atome_indcvi_za %>% 
   ggplot2::ggplot(ggplot2::aes(fill = .data$atome_indcvi_type)) +
   ggplot2::geom_sf() +
   ggplot2::geom_sf(data = spatial_iris %>% dplyr::filter(stringr::str_detect(.data$iris_code, "^75")), 
                    linetype = "dotted", linewidth = .15, fill = NA, color = "white") +
   ggplot2::coord_sf() +
-  ggplot2::labs(title = "Frontières atome_indcvi et iris pour l'IdF")
+  ggplot2::labs(title = "atome_indcvi and IRIS boundaries in Île-de-France") +
+  ggplot2::theme_minimal()
 ```
 
 ...and a zoom for Paris
 
 ```{r}
+data("spatial_iris", package = "mapuce.data.2020")
+data("spatial_atome_indcvi_za", package = "mapuce.data.2020")
 spatial_atome_indcvi_za %>% 
   dplyr::filter(stringr::str_detect(.data$atome_indcvi, "^75")) %>%
   ggplot2::ggplot(ggplot2::aes(fill = .data$atome_indcvi_type)) +
   ggplot2::geom_sf() +
-  ggplot2::geom_sf(data = spatial_iris %>% dplyr::filter(stringr::str_detect(.data$iris_code, "^75")), 
+  ggplot2::geom_sf(data = spatial_iris %>%   dplyr::filter(stringr::str_detect(.data$iris_code, "^75")), 
                    linetype = "dotted", linewidth = .15, fill = NA, color = "white") +
   ggplot2::coord_sf() +
-  ggplot2::labs(title = "Frontières atome_indcvi et iris pour l'IdF")
+  ggplot2::labs(title = "atome_indcvi and IRIS boundaries in Île-de-France") +
+  ggplot2::theme_minimal()
 ```
 
+## License
+
+MIT. See `LICENSE.md` for details.
