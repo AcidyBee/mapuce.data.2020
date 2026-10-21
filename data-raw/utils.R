@@ -95,3 +95,28 @@ process_all_zones <- function(full_data, zone_config, data_name) {
   }) %>%
     purrr::set_names(paste0(data_name, "_", names(zone_config)))
 }
+
+
+#' Optimise la compression des fichiers .rda d'un package
+#'
+#' Analyse chaque fichier .rda avec tools::checkRdaFiles() et ré-applique
+#' la meilleure compression recommandée.
+#'
+#' @param dir Répertoire contenant les fichiers .rda (par défaut "data/").
+#' @return Invisiblement, un data.frame des recommandations.
+#' @noRd
+optimise_rda_compression <- function(dir = "data/") {
+  files <- list.files(dir, pattern = "\\.rda$", full.names = TRUE)
+  if (length(files) == 0) {
+    message("Aucun fichier .rda trouvé dans ", dir)
+    return(invisible(NULL))
+  }
+  
+  # resaveRdaFiles sans compress explicite ré-analyse et applique la meilleure méthode
+  tools::resaveRdaFiles(files, compress = "auto")
+  
+  info <- tools::checkRdaFiles(files)
+  message("Compression optimisée pour ", length(files), " fichier(s).")
+  print(info)
+  invisible(info)
+}
