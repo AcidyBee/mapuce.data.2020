@@ -7,3 +7,7 @@
 ^dev$             # /dev/: Holds internal tools, demo apps, and experimental modules.
 ^dev/.*
 ^README\.Rmd$
+^data-raw/pipeline_graph\.html$
+^\.github$
+^_targets$
+^cran-comments\.md$
