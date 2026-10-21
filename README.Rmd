@@ -49,30 +49,58 @@ The goal of mapuce.data.2020 is to ...
 You can install the development version of mapuce.data.2020 like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+remotes::install_github("AcidyBee/mapuce.data.2020")
 ```
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Data for this project are agregated at what Insee calls cantville granularity: it corresponds to:
+- IRIS for dense areas
+- COMMUNE or CANTON for lesser population areas
+
+The atome_indcvi key has been created to link semantic and spatial information for Insee RP indcvi detail files. The atome_indcvi variable is the smallest possible entity for indcvi files, and is obtained using hierachically (IRIS < COMMUNE < CANTON) the information available for each observation in the file.
+
+This is a basic example which shows you how to load data:
 
 ```{r example}
 library(mapuce.data.2020)
 ## basic example code
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+### Semantic data
 
-```{r cars}
-summary(cars)
+Head of semantic data for zone A: Ile de France. The rows correspond to the city of Paris.
+
+You can see that for the 6 first rows of the dataset, the 9 digits iris_code is available. On the other hand, for Paris the cv_code (cantville) is not complete: it corresponds to the DEPARTEMENT granularity. It is replaced with arm_code which only exists for the 3 major french cities: Lyon, Marseille and Paris).
+
+```{r}
+head(mapuce_indcvi_za)
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+### Spatial data
 
-You can also embed plots, for example:
+Corresponding choroplethe map data for zone A (Ile de France)
 
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r}
+spatial_atome_indcvi_za %>% 
+  ggplot2::ggplot(ggplot2::aes(fill = .data$atome_indcvi_type)) +
+  ggplot2::geom_sf() +
+  ggplot2::geom_sf(data = spatial_iris %>% dplyr::filter(stringr::str_detect(.data$iris_code, "^75")), 
+                   linetype = "dotted", linewidth = .15, fill = NA, color = "white") +
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Frontières atome_indcvi et iris pour l'IdF")
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+...and a zoom for Paris
+
+```{r}
+spatial_atome_indcvi_za %>% 
+  dplyr::filter(stringr::str_detect(.data$atome_indcvi, "^75")) %>%
+  ggplot2::ggplot(ggplot2::aes(fill = .data$atome_indcvi_type)) +
+  ggplot2::geom_sf() +
+  ggplot2::geom_sf(data = spatial_iris %>% dplyr::filter(stringr::str_detect(.data$iris_code, "^75")), 
+                   linetype = "dotted", linewidth = .15, fill = NA, color = "white") +
+  ggplot2::coord_sf() +
+  ggplot2::labs(title = "Frontières atome_indcvi et iris pour l'IdF")
+```
+

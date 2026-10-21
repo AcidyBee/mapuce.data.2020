@@ -10,7 +10,7 @@ Imports:
     magrittr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Depends: 
     R (>= 3.5)
 LazyData: true
@@ -18,6 +18,8 @@ LazyDataCompression: xz
 Suggests: 
     dplyr,
     ggplot2,
+    insee.admin,
+    insee.admin.data.2022,
     knitr,
     rmarkdown
 VignetteBuilder: knitr
